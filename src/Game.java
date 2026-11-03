@@ -1,5 +1,3 @@
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -23,6 +21,8 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 	private yCharacters player;
 	private Queue <zz_Enemies> enemies;
 	private ArrayList<xx_UserMissle> uMissles;
+	private ArrayList<xx_EnemyMissle> eMissles;
+	private int count;
 	
 
 	
@@ -35,10 +35,13 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 		cSelect = 0;
 		JJH = new ImageIcon("jjh.jpg");
 		enemies = setEnemies();
+		count = 0;
+		
 		uMissles = new ArrayList<>();
+		eMissles = new ArrayList<xx_EnemyMissle>();
 		shootCooldown = 0;
 		shootDelay = 200;
-		
+		//eMissles = new ArrayList<>();
 		for(yCharacters c: displayCharacters) {
 			
 			System.out.println(c.toString());
@@ -86,6 +89,12 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 
 		}
 
+		public void getEnemyMissle() {
+        if (enemies.isEmpty()) return;
+        zz_Enemies shooter = enemies.element();
+        eMissles.add(new xx_EnemyMissle(shooter.getX() + shooter.getW() / 2, shooter.getY() + shooter.getH(), 50, 50));
+    	}
+
 	public void fireUserMissle() {
         if (shootCooldown == 0) {
             uMissles.add(new xx_UserMissle(player.getX() + player.getW() / 2 - 10, player.getY(), 50, 50));
@@ -101,11 +110,27 @@ public class Game  extends JPanel implements Runnable, KeyListener{
         }
     }
 
+	public void moveEnemyMissles() {
+        for (int i = eMissles.size() - 1; i >= 0; i--) {
+            xx_EnemyMissle m = eMissles.get(i);
+            m.setdx(-1);
+            if (m.getY() > getHeight()) eMissles.remove(i);
+        }
+    }
+
 	public void drawUserMissles(Graphics g2d) {
         for (xx_UserMissle m : uMissles) {
             g2d.drawImage(m.getPic().getImage(), m.getX(), m.getY(), m.getWidth(), m.getHeight(), this);
         }
     }
+
+	 public void drawEnemyMissles(Graphics g2d) {
+        Graphics2D g2 = (Graphics2D) g2d;
+        for (xx_EnemyMissle m : eMissles) {
+            g2.drawImage(m.getPic().getImage(), m.getX(), m.getY(), m.getWidth(), m.getHeight(), this);
+        }
+    }
+
 	
 	public void checkMissleEnemyCollision() {
     	if (enemies.isEmpty()) return;
@@ -153,17 +178,21 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 			break;
 
 			case "L1":
-
+			count++;
+			if (count % 500 == 0) getEnemyMissle();
 			if (shootCooldown > 0) shootCooldown--;
 			g2d.drawImage(JJH.getImage(),0,0, this);
 			player.drawChar(g2d);
 			player.moveCharacter();
 			enemies.element().drawEnemy(g2d);
 			moveUserMissles();
+			moveEnemyMissles();
 			checkMissleEnemyCollision();
 			drawUserMissles(g2d);
+			drawEnemyMissles(g2d);
 			g2d.setFont(new Font("Noto Sans JP", Font.BOLD, 25));
 			g2d.setColor(Color.WHITE);
+			g2d.drawString("Health:" + player.getHealth(), 100, 50);
 			g2d.drawString("Health:" + enemies.element().getHealth(), 900, 50);
 		
 		
