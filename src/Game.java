@@ -107,6 +107,31 @@ public class Game  extends JPanel implements Runnable, KeyListener{
         }
     }
 	
+	public void checkMissleEnemyCollision() {
+    	if (enemies.isEmpty()) return;
+
+    		zz_Enemies e = enemies.element();
+
+   		 for (int i = uMissles.size() - 1; i >= 0; i--) {
+       		 xx_UserMissle m = uMissles.get(i);
+
+       		 boolean hit = m.getX() < e.getX() + e.getW() &&
+                      m.getX() + m.getWidth() > e.getX() &&
+                      m.getY() < e.getY() + e.getH() &&
+                      m.getY() + m.getHeight() > e.getY();
+
+       	 if (hit) {
+            uMissles.remove(i);
+            e.setHealth(e.getHealth() - player.getDamage());
+
+            if (e.getHealth() <= 0) {
+                enemies.remove();
+                return;
+            }
+        }
+    }
+	}
+	
 	private void cSelectOffScreenPrevent() {
 		if (cSelect > 3) {
 			cSelect = 3;
@@ -135,6 +160,7 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 			player.moveCharacter();
 			enemies.element().drawEnemy(g2d);
 			moveUserMissles();
+			checkMissleEnemyCollision();
 			drawUserMissles(g2d);
 			g2d.setFont(new Font("Noto Sans JP", Font.BOLD, 25));
 			g2d.setColor(Color.WHITE);
