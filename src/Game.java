@@ -156,6 +156,20 @@ public class Game  extends JPanel implements Runnable, KeyListener{
         }
     }
 	}
+
+	public void checkMisslePlayerCollision() {
+        for (int i = eMissles.size() - 1; i >= 0; i--) {
+            xx_EnemyMissle m = eMissles.get(i);
+            boolean hit = m.getX() < player.getX() + player.getW() &&
+                          m.getX() + m.getWidth() > player.getX() &&
+                          m.getY() < player.getY() + player.getH() &&
+                          m.getY() + m.getHeight() > player.getY();
+            if (hit) {
+                player.setHealth(player.getHealth() - 10);
+                eMissles.remove(i);
+            }
+        }
+    }
 	
 	private void cSelectOffScreenPrevent() {
 		if (cSelect > 3) {
@@ -188,6 +202,7 @@ public class Game  extends JPanel implements Runnable, KeyListener{
 			moveUserMissles();
 			moveEnemyMissles();
 			checkMissleEnemyCollision();
+			checkMisslePlayerCollision();
 			drawUserMissles(g2d);
 			drawEnemyMissles(g2d);
 			g2d.setFont(new Font("Noto Sans JP", Font.BOLD, 25));
